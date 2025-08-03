@@ -2,11 +2,10 @@ package hashring
 
 import (
 	"fmt"
+	"hash/fnv"
 	"log"
 	"sort"
 	"sync"
-
-	"github.com/spaolacci/murmur3"
 )
 
 const (
@@ -21,7 +20,9 @@ type HashRing struct {
 }
 
 func hashKey(key string) uint32 {
-	return murmur3.Sum32([]byte(key))
+	hashWriter := fnv.New32a()
+	hashWriter.Write([]byte(key))
+	return hashWriter.Sum32()
 }
 
 func (hr *HashRing) AddNode(nodeID string) {
