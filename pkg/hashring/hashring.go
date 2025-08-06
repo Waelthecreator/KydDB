@@ -3,7 +3,6 @@ package hashring
 import (
 	"fmt"
 	"hash/fnv"
-	"log"
 	"sort"
 	"sync"
 )
@@ -19,7 +18,7 @@ type HashRing struct {
 	nodes      map[string]bool
 }
 
-func hashKey(key string) uint32 {
+func HashKey(key string) uint32 {
 	hashWriter := fnv.New32a()
 	hashWriter.Write([]byte(key))
 	return hashWriter.Sum32()
@@ -29,13 +28,12 @@ func (hr *HashRing) AddNode(nodeID string) {
 	hr.mu.Lock()
 	defer hr.mu.Unlock()
 	if hr.nodes[nodeID] {
-		log.Printf("Node %s already exists in the ring", nodeID)
 		return
 	}
 	hr.nodes[nodeID] = true
 	for i := 0; i < defaultVirtualNodes; i++ {
 		virtualNodeKey := fmt.Sprintf("%s-%d", nodeID, i)
-		virtualNodeKeyHash := hashKey(virtualNodeKey)
+		virtualNodeKeyHash := HashKey(virtualNodeKey)
 		hr.ring[virtualNodeKeyHash] = nodeID
 		hr.sortedKeys = append(hr.sortedKeys, virtualNodeKeyHash)
 	}
@@ -48,7 +46,6 @@ func (hr *HashRing) RemoveNode(nodeID string) {
 	hr.mu.Lock()
 	defer hr.mu.Unlock()
 	if !hr.nodes[nodeID] {
-		log.Printf("Node %s does not exist in the ring", nodeID)
 		return
 	}
 	delete(hr.nodes, nodeID)
@@ -67,10 +64,9 @@ func (hr *HashRing) GetNode(key string) (string, error) {
 	hr.mu.RLock()
 	defer hr.mu.RUnlock()
 	if len(hr.nodes) == 0 {
-		log.Println("No nodes available in the hash ring")
 		return "", fmt.Errorf("no nodes available")
 	}
-	keyHash := hashKey(key)
+	keyHash := HashKey(key)
 	idx := sort.Search(len(hr.sortedKeys), func(i int) bool {
 		return hr.sortedKeys[i] >= keyHash
 	})

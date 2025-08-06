@@ -1,16 +1,25 @@
 package storage
 
-import "container/list"
+import (
+	"time"
+)
 
 const (
 	defaultMaxSize = 1000
 )
+
+type CacheEntry struct {
+	key              string
+	value            []byte
+	lastModifiedTime time.Time
+}
 
 type Storage interface {
 	Set(key string, value []byte) error
 	Delete(key string) error
 	Get(key string) ([]byte, error)
 	Len() int
-	Has(key string) (*list.Element, bool)
-	Rebalance(keysToAdd map[string][]byte)
+	AddToRebalance(pairsToAdd []CacheEntry)
+	RemoveKeyToRebalance(keysToRemove []string) []CacheEntry
+	GetAllEntries() []CacheEntry
 }
