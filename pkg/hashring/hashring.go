@@ -16,6 +16,7 @@ type HashRing struct {
 	ring       map[uint32]string
 	sortedKeys []uint32
 	nodes      map[string]bool
+	nodeCount  int
 }
 
 func HashKey(key string) uint32 {
@@ -31,7 +32,7 @@ func (hr *HashRing) AddNode(nodeID string) {
 		return
 	}
 	hr.nodes[nodeID] = true
-	for i := 0; i < defaultVirtualNodes; i++ {
+	for i := 0; i < hr.nodeCount; i++ {
 		virtualNodeKey := fmt.Sprintf("%s-%d", nodeID, i)
 		virtualNodeKeyHash := HashKey(virtualNodeKey)
 		hr.ring[virtualNodeKeyHash] = nodeID
@@ -95,10 +96,14 @@ func (hr *HashRing) GetVirtualNodes() []VirtualNode {
 	return virtualNodes
 }
 
-func NewHashRing() *HashRing {
+func NewHashRing(vNode int) *HashRing {
+	if vNode == 0 {
+		vNode = defaultVirtualNodes
+	}
 	return &HashRing{
 		ring:       make(map[uint32]string),
 		sortedKeys: make([]uint32, 0),
 		nodes:      make(map[string]bool),
+		nodeCount:  vNode,
 	}
 }

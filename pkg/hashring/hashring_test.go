@@ -11,21 +11,30 @@ const nodeID1 = "node1"
 const nodeID2 = "node2"
 
 func TestNewHashRing(t *testing.T) {
-	hr := NewHashRing()
+	hr := NewHashRing(0)
 	assert.NotNil(t, hr)
 	assert.NotNil(t, hr.ring)
 	assert.NotNil(t, hr.sortedKeys)
 	assert.NotNil(t, hr.nodes)
+	assert.Equal(t, 100, hr.nodeCount)
+}
+func TestNewHashRingWithCustomCount(t *testing.T) {
+	hr := NewHashRing(50)
+	assert.NotNil(t, hr)
+	assert.NotNil(t, hr.ring)
+	assert.NotNil(t, hr.sortedKeys)
+	assert.NotNil(t, hr.nodes)
+	assert.Equal(t, 50, hr.nodeCount)
 }
 func TestAddNode(t *testing.T) {
-	hr := NewHashRing()
+	hr := NewHashRing(0)
 	hr.AddNode(nodeID1)
 	assert.True(t, hr.nodes[nodeID1])
 	assert.Equal(t, 100, len(hr.ring))
 	assert.Equal(t, 100, len(hr.sortedKeys))
 }
 func TestRemoveNode(t *testing.T) {
-	hr := NewHashRing()
+	hr := NewHashRing(0)
 	hr.AddNode(nodeID1)
 	hr.RemoveNode(nodeID1)
 	assert.False(t, hr.nodes[nodeID1])
@@ -33,7 +42,7 @@ func TestRemoveNode(t *testing.T) {
 	assert.Equal(t, 0, len(hr.sortedKeys))
 }
 func TestGetNode(t *testing.T) {
-	hr := NewHashRing()
+	hr := NewHashRing(0)
 	hr.AddNode(nodeID1)
 	hr.AddNode(nodeID2)
 	nodeForKey, err := hr.GetNode(key)
@@ -46,12 +55,12 @@ func TestGetNode(t *testing.T) {
 	assert.Equal(t, nodeID2, nodeForKeyAfterRemoval)
 }
 func TestGetNodeWithNoNodes(t *testing.T) {
-	hr := NewHashRing()
+	hr := NewHashRing(0)
 	_, err := hr.GetNode(key)
 	assert.Error(t, err)
 }
 func TestAddNodeTwice(t *testing.T) {
-	hr := NewHashRing()
+	hr := NewHashRing(0)
 	hr.AddNode(nodeID1)
 	initialRingSize := len(hr.ring)
 	hr.AddNode(nodeID1)
@@ -59,7 +68,7 @@ func TestAddNodeTwice(t *testing.T) {
 	assert.True(t, hr.nodes[nodeID1])
 }
 func TestRemoveNonExistentNode(t *testing.T) {
-	hr := NewHashRing()
+	hr := NewHashRing(0)
 	hr.AddNode(nodeID1)
 	hr.RemoveNode(nodeID2)
 	assert.True(t, hr.nodes[nodeID1])
