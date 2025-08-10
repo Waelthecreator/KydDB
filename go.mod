@@ -1,4 +1,4 @@
-module github.com/Waelthecreator/districache
+module github.com/Waelthecreator/KydDB
 
 go 1.24.5
 
