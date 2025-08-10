@@ -86,7 +86,7 @@ func (lru *LeastRecentlyUsedCache) Get(key string) ([]byte, error) {
 func (lru *LeastRecentlyUsedCache) lruLen() int {
 	return len(lru.storageIndex)
 }
-func (lru *LeastRecentlyUsedCache) AddToRebalance(pairsToAdd []CacheEntry) {
+func (lru *LeastRecentlyUsedCache) AddToRebalance(pairsToAdd []CacheEntry) (err error) {
 	lru.mu.Lock()
 	defer lru.mu.Unlock()
 	index := 0
@@ -97,7 +97,10 @@ func (lru *LeastRecentlyUsedCache) AddToRebalance(pairsToAdd []CacheEntry) {
 				lru.storageIndex[pairsToAdd[index].key] = newElement
 				index++
 				if lru.lruLen() > lru.maxSize {
-					lru.evict()
+					err := lru.evict()
+					if err != nil {
+						return errors.New("key set error")
+					}
 				}
 			}
 		}
@@ -107,7 +110,7 @@ func (lru *LeastRecentlyUsedCache) AddToRebalance(pairsToAdd []CacheEntry) {
 		lru.storageIndex[pairsToAdd[index].key] = newElement
 		index++
 	}
-
+	return nil
 }
 func (lru *LeastRecentlyUsedCache) RemoveKeyToRebalance(keysToRemove []string) []CacheEntry {
 	lru.mu.Lock()
