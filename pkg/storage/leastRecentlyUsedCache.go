@@ -3,6 +3,7 @@ package storage
 import (
 	"container/list"
 	"errors"
+	"sort"
 	"sync"
 	"time"
 )
@@ -11,18 +12,22 @@ type LeastRecentlyUsedCache struct {
 	storageIndex map[string]*list.Element
 	storageList  *list.List
 	mu           sync.RWMutex
+	maxSize      int
 }
 
-func NewLeastRecentlyUsedCache() *LeastRecentlyUsedCache {
+func NewLeastRecentlyUsedCache(slots int) *LeastRecentlyUsedCache {
+	size := slots
+	if slots <= 0 {
+		size = defaultMaxSize
+	}
 	return &LeastRecentlyUsedCache{
 		storageIndex: make(map[string]*list.Element),
 		storageList:  list.New(),
+		maxSize:      size,
 	}
 }
 
 func (lru *LeastRecentlyUsedCache) evict() error {
-	lru.mu.Lock()
-	defer lru.mu.Unlock()
 	element := lru.storageList.Back()
 	if element == nil {
 		return errors.New("eviction error")
@@ -50,7 +55,7 @@ func (lru *LeastRecentlyUsedCache) Set(key string, value []byte) error {
 		lru.storageList.MoveToFront(element)
 		return nil
 	}
-	if lru.storageList.Len() >= defaultMaxSize {
+	if lru.storageList.Len() >= lru.maxSize {
 		err := lru.evict()
 		if err != nil {
 			return errors.New("key set error")
@@ -78,9 +83,7 @@ func (lru *LeastRecentlyUsedCache) Get(key string) ([]byte, error) {
 		return entry.value, nil
 	}
 }
-func (lru *LeastRecentlyUsedCache) Len() int {
-	lru.mu.RLock()
-	defer lru.mu.RUnlock()
+func (lru *LeastRecentlyUsedCache) lruLen() int {
 	return len(lru.storageIndex)
 }
 func (lru *LeastRecentlyUsedCache) AddToRebalance(pairsToAdd []CacheEntry) {
@@ -93,13 +96,13 @@ func (lru *LeastRecentlyUsedCache) AddToRebalance(pairsToAdd []CacheEntry) {
 				newElement := lru.storageList.InsertBefore(pairsToAdd[index], element)
 				lru.storageIndex[pairsToAdd[index].key] = newElement
 				index++
-				if lru.Len() > defaultMaxSize {
+				if lru.lruLen() > lru.maxSize {
 					lru.evict()
 				}
 			}
 		}
 	}
-	for index < len(pairsToAdd) && lru.Len() < defaultMaxSize {
+	for index < len(pairsToAdd) && lru.lruLen() < lru.maxSize {
 		newElement := lru.storageList.PushBack(pairsToAdd[index])
 		lru.storageIndex[pairsToAdd[index].key] = newElement
 		index++
@@ -108,7 +111,6 @@ func (lru *LeastRecentlyUsedCache) AddToRebalance(pairsToAdd []CacheEntry) {
 }
 func (lru *LeastRecentlyUsedCache) RemoveKeyToRebalance(keysToRemove []string) []CacheEntry {
 	lru.mu.Lock()
-	defer lru.mu.Unlock()
 	output := make([]CacheEntry, 0, len(keysToRemove))
 	for _, value := range keysToRemove {
 		if element, exists := lru.storageIndex[value]; exists {
@@ -119,6 +121,10 @@ func (lru *LeastRecentlyUsedCache) RemoveKeyToRebalance(keysToRemove []string) [
 			}
 		}
 	}
+	lru.mu.Unlock()
+	sort.Slice(output, func(i, j int) bool {
+		return output[i].lastModifiedTime.After(output[j].lastModifiedTime)
+	})
 	return output
 }
 

@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	defaultMaxSize = 1000
+	defaultMaxSize = 100
 )
 
 type CacheEntry struct {
