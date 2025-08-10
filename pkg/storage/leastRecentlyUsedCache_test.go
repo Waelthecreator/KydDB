@@ -118,7 +118,8 @@ func TestAddToRebalanceEmptyCache(t *testing.T) {
 		makeEntry("key1", "value1", time.Now()),
 		makeEntry("key2", "value2", time.Now().Add(-10*time.Second)),
 	}
-	lru.AddToRebalance(entries)
+	err := lru.AddToRebalance(entries)
+	assert.NoError(t, err)
 	assert.Equal(t, 2, lru.lruLen())
 	assert.Equal(t, "key1", lru.storageList.Front().Value.(CacheEntry).key)
 }
@@ -129,7 +130,8 @@ func TestAddToRebalanceItemIsNewer(t *testing.T) {
 	lru := NewLeastRecentlyUsedCache(3)
 	elem := lru.storageList.PushFront(makeEntry("key1", "value1", oldTime))
 	lru.storageIndex["key1"] = elem
-	lru.AddToRebalance([]CacheEntry{makeEntry("key2", "value2", newTime)})
+	err := lru.AddToRebalance([]CacheEntry{makeEntry("key2", "value2", newTime)})
+	assert.NoError(t, err)
 	assert.Equal(t, 2, lru.lruLen())
 	first := lru.storageList.Front().Value.(CacheEntry)
 	assert.Equal(t, "key2", first.key)
@@ -141,7 +143,8 @@ func TestAddToRebalanceWhereItemIsOlder(t *testing.T) {
 	lru := NewLeastRecentlyUsedCache(3)
 	elem := lru.storageList.PushFront(makeEntry("key1", "value1", newTime))
 	lru.storageIndex["key1"] = elem
-	lru.AddToRebalance([]CacheEntry{makeEntry("key2", "value2", oldTime)})
+	err := lru.AddToRebalance([]CacheEntry{makeEntry("key2", "value2", oldTime)})
+	assert.NoError(t, err)
 	assert.Equal(t, 2, lru.lruLen())
 	assert.Equal(t, "key1", lru.storageList.Front().Value.(CacheEntry).key)
 }
@@ -152,7 +155,8 @@ func TestAddToRebalanceWithEviction(t *testing.T) {
 	lru := NewLeastRecentlyUsedCache(1)
 	elem := lru.storageList.PushFront(makeEntry("key1", "value1", oldTime))
 	lru.storageIndex["key1"] = elem
-	lru.AddToRebalance([]CacheEntry{makeEntry("key2", "value2", newTime)})
+	err := lru.AddToRebalance([]CacheEntry{makeEntry("key2", "value2", newTime)})
+	assert.NoError(t, err)
 	assert.Equal(t, 1, lru.lruLen())
 	assert.Equal(t, "key2", lru.storageList.Front().Value.(CacheEntry).key)
 }
