@@ -1,0 +1,102 @@
+syntax = "proto3";
+
+package kyddb;
+
+import "google/protobuf/timestamp.proto";
+option go_package = "github.com/Waelthecreator/KydDB";
+// Cache entry representation
+message CacheEntry {
+  string key = 1;
+  bytes value = 2;
+  google.protobuf.Timestamp last_modified_time = 3;
+}
+
+// Node information
+message NodeInfo {
+  string id = 1;
+  string address = 2;
+  int32 port = 3;
+  google.protobuf.Timestamp last_seen = 4;
+}
+
+// Cluster management messages
+message JoinRequest {
+  NodeInfo node_info = 1;
+}
+
+message JoinResponse {
+  bool success = 1;
+}
+
+message LeaveRequest {
+  string node_id = 1;
+}
+
+message LeaveResponse {
+  bool success = 1;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status = 1;
+  string node_id = 2;
+  google.protobuf.Timestamp timestamp = 3;
+}
+
+message GetNodesRequest {}
+
+message GetNodesResponse {
+  repeated NodeInfo nodes = 1;
+}
+
+// Cache operation messages
+message GetRequest {
+  string key = 1;
+}
+
+message GetResponse {
+  bool found = 1;
+  bytes value = 2;
+  string error = 3;
+}
+
+message SetRequest {
+  string key = 1;
+  bytes value = 2;
+}
+
+message SetResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message RebalanceAddRequest {
+  repeated CacheEntry entries = 1;
+}
+
+message RebalanceAddResponse {
+  bool success = 1;
+  string error = 2;
+}
+
+message RebalanceRemoveRequest {
+  repeated string keys = 1;
+}
+
+message RebalanceRemoveResponse {
+  repeated CacheEntry removed_entries = 1;
+  string error = 2;
+}
+
+service NodeService {
+  // Cluster management
+  rpc Join(JoinRequest) returns (JoinResponse);
+  rpc Leave(LeaveRequest) returns (LeaveResponse);
+  rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+  rpc GetNodes(GetNodesRequest) returns (GetNodesResponse);
+  rpc Get(GetRequest) returns (GetResponse);
+  rpc Set(SetRequest) returns (SetResponse);
+  rpc RebalanceAdd(RebalanceAddRequest) returns (RebalanceAddResponse);
+  rpc RebalanceRemove(RebalanceRemoveRequest) returns (RebalanceRemoveResponse);
+}
