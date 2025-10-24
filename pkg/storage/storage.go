@@ -9,17 +9,16 @@ const (
 )
 
 type CacheEntry struct {
-	key              string
-	value            []byte
-	lastModifiedTime time.Time
+	Key              string
+	Value            []byte
+	LastModifiedTime time.Time
 }
 
 type Storage interface {
 	Set(key string, value []byte) error
-	Delete(key string) error
 	Get(key string) ([]byte, error)
 	Len() int
-	AddToRebalance(pairsToAdd []CacheEntry)
+	AddToRebalance(pairsToAdd []CacheEntry) error
 	RemoveKeyToRebalance(keysToRemove []string) []CacheEntry
 	GetAllEntries() []CacheEntry
 }

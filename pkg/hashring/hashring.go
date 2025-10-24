@@ -42,6 +42,11 @@ func (hr *HashRing) AddNode(nodeID string) {
 		return hr.sortedKeys[i] < hr.sortedKeys[j]
 	})
 }
+func (hr *HashRing) AddNodes(nodeIDs []string) {
+	for _, nodeID := range nodeIDs {
+		hr.AddNode(nodeID)
+	}
+}
 
 func (hr *HashRing) RemoveNode(nodeID string) {
 	hr.mu.Lock()

@@ -16,7 +16,14 @@ message NodeInfo {
   string id = 1;
   string address = 2;
   int32 port = 3;
-  google.protobuf.Timestamp last_seen = 4;
+  string status = 4;
+  google.protobuf.Timestamp last_seen = 5;
+}
+//clusterDelta
+message clusterDelta {
+  repeated NodeInfo added = 1;
+  repeated NodeInfo suspected = 2;
+  repeated NodeInfo removed = 3;
 }
 
 // Cluster management messages
@@ -25,7 +32,8 @@ message JoinRequest {
 }
 
 message JoinResponse {
-  bool success = 1;
+  repeated NodeInfo nodes = 1;
+  NodeInfo bootstrapNode = 2;
 }
 
 message LeaveRequest {
@@ -42,12 +50,7 @@ message HealthCheckResponse {
   string status = 1;
   string node_id = 2;
   google.protobuf.Timestamp timestamp = 3;
-}
-
-message GetNodesRequest {}
-
-message GetNodesResponse {
-  repeated NodeInfo nodes = 1;
+  clusterDelta delta = 4;
 }
 
 // Cache operation messages
@@ -90,11 +93,9 @@ message RebalanceRemoveResponse {
 }
 
 service NodeService {
-  // Cluster management
   rpc Join(JoinRequest) returns (JoinResponse);
   rpc Leave(LeaveRequest) returns (LeaveResponse);
   rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
-  rpc GetNodes(GetNodesRequest) returns (GetNodesResponse);
   rpc Get(GetRequest) returns (GetResponse);
   rpc Set(SetRequest) returns (SetResponse);
   rpc RebalanceAdd(RebalanceAddRequest) returns (RebalanceAddResponse);

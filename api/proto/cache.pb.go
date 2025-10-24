@@ -89,7 +89,8 @@ type NodeInfo struct {
 	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	Address       string                 `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
 	Port          int32                  `protobuf:"varint,3,opt,name=port,proto3" json:"port,omitempty"`
-	LastSeen      *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=last_seen,json=lastSeen,proto3" json:"last_seen,omitempty"`
+	Status        string                 `protobuf:"bytes,4,opt,name=status,proto3" json:"status,omitempty"`
+	LastSeen      *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=last_seen,json=lastSeen,proto3" json:"last_seen,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -145,9 +146,77 @@ func (x *NodeInfo) GetPort() int32 {
 	return 0
 }
 
+func (x *NodeInfo) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
 func (x *NodeInfo) GetLastSeen() *timestamppb.Timestamp {
 	if x != nil {
 		return x.LastSeen
+	}
+	return nil
+}
+
+//clusterDelta
+type ClusterDelta struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Added         []*NodeInfo            `protobuf:"bytes,1,rep,name=added,proto3" json:"added,omitempty"`
+	Suspected     []*NodeInfo            `protobuf:"bytes,2,rep,name=suspected,proto3" json:"suspected,omitempty"`
+	Removed       []*NodeInfo            `protobuf:"bytes,3,rep,name=removed,proto3" json:"removed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ClusterDelta) Reset() {
+	*x = ClusterDelta{}
+	mi := &file_api_proto_cache_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ClusterDelta) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ClusterDelta) ProtoMessage() {}
+
+func (x *ClusterDelta) ProtoReflect() protoreflect.Message {
+	mi := &file_api_proto_cache_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ClusterDelta.ProtoReflect.Descriptor instead.
+func (*ClusterDelta) Descriptor() ([]byte, []int) {
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ClusterDelta) GetAdded() []*NodeInfo {
+	if x != nil {
+		return x.Added
+	}
+	return nil
+}
+
+func (x *ClusterDelta) GetSuspected() []*NodeInfo {
+	if x != nil {
+		return x.Suspected
+	}
+	return nil
+}
+
+func (x *ClusterDelta) GetRemoved() []*NodeInfo {
+	if x != nil {
+		return x.Removed
 	}
 	return nil
 }
@@ -162,7 +231,7 @@ type JoinRequest struct {
 
 func (x *JoinRequest) Reset() {
 	*x = JoinRequest{}
-	mi := &file_api_proto_cache_proto_msgTypes[2]
+	mi := &file_api_proto_cache_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -174,7 +243,7 @@ func (x *JoinRequest) String() string {
 func (*JoinRequest) ProtoMessage() {}
 
 func (x *JoinRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[2]
+	mi := &file_api_proto_cache_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -187,7 +256,7 @@ func (x *JoinRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinRequest.ProtoReflect.Descriptor instead.
 func (*JoinRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{2}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *JoinRequest) GetNodeInfo() *NodeInfo {
@@ -199,14 +268,15 @@ func (x *JoinRequest) GetNodeInfo() *NodeInfo {
 
 type JoinResponse struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Success       bool                   `protobuf:"varint,1,opt,name=success,proto3" json:"success,omitempty"`
+	Nodes         []*NodeInfo            `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
+	BootstrapNode *NodeInfo              `protobuf:"bytes,2,opt,name=bootstrapNode,proto3" json:"bootstrapNode,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *JoinResponse) Reset() {
 	*x = JoinResponse{}
-	mi := &file_api_proto_cache_proto_msgTypes[3]
+	mi := &file_api_proto_cache_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -218,7 +288,7 @@ func (x *JoinResponse) String() string {
 func (*JoinResponse) ProtoMessage() {}
 
 func (x *JoinResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[3]
+	mi := &file_api_proto_cache_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -231,14 +301,21 @@ func (x *JoinResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JoinResponse.ProtoReflect.Descriptor instead.
 func (*JoinResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{3}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *JoinResponse) GetSuccess() bool {
+func (x *JoinResponse) GetNodes() []*NodeInfo {
 	if x != nil {
-		return x.Success
+		return x.Nodes
 	}
-	return false
+	return nil
+}
+
+func (x *JoinResponse) GetBootstrapNode() *NodeInfo {
+	if x != nil {
+		return x.BootstrapNode
+	}
+	return nil
 }
 
 type LeaveRequest struct {
@@ -250,7 +327,7 @@ type LeaveRequest struct {
 
 func (x *LeaveRequest) Reset() {
 	*x = LeaveRequest{}
-	mi := &file_api_proto_cache_proto_msgTypes[4]
+	mi := &file_api_proto_cache_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -262,7 +339,7 @@ func (x *LeaveRequest) String() string {
 func (*LeaveRequest) ProtoMessage() {}
 
 func (x *LeaveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[4]
+	mi := &file_api_proto_cache_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -275,7 +352,7 @@ func (x *LeaveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LeaveRequest.ProtoReflect.Descriptor instead.
 func (*LeaveRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{4}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *LeaveRequest) GetNodeId() string {
@@ -294,7 +371,7 @@ type LeaveResponse struct {
 
 func (x *LeaveResponse) Reset() {
 	*x = LeaveResponse{}
-	mi := &file_api_proto_cache_proto_msgTypes[5]
+	mi := &file_api_proto_cache_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -306,7 +383,7 @@ func (x *LeaveResponse) String() string {
 func (*LeaveResponse) ProtoMessage() {}
 
 func (x *LeaveResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[5]
+	mi := &file_api_proto_cache_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -319,7 +396,7 @@ func (x *LeaveResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LeaveResponse.ProtoReflect.Descriptor instead.
 func (*LeaveResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{5}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *LeaveResponse) GetSuccess() bool {
@@ -337,7 +414,7 @@ type HealthCheckRequest struct {
 
 func (x *HealthCheckRequest) Reset() {
 	*x = HealthCheckRequest{}
-	mi := &file_api_proto_cache_proto_msgTypes[6]
+	mi := &file_api_proto_cache_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -349,7 +426,7 @@ func (x *HealthCheckRequest) String() string {
 func (*HealthCheckRequest) ProtoMessage() {}
 
 func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[6]
+	mi := &file_api_proto_cache_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -362,7 +439,7 @@ func (x *HealthCheckRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthCheckRequest.ProtoReflect.Descriptor instead.
 func (*HealthCheckRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{6}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{7}
 }
 
 type HealthCheckResponse struct {
@@ -370,13 +447,14 @@ type HealthCheckResponse struct {
 	Status        string                 `protobuf:"bytes,1,opt,name=status,proto3" json:"status,omitempty"`
 	NodeId        string                 `protobuf:"bytes,2,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
 	Timestamp     *timestamppb.Timestamp `protobuf:"bytes,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Delta         *ClusterDelta          `protobuf:"bytes,4,opt,name=delta,proto3" json:"delta,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *HealthCheckResponse) Reset() {
 	*x = HealthCheckResponse{}
-	mi := &file_api_proto_cache_proto_msgTypes[7]
+	mi := &file_api_proto_cache_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -388,7 +466,7 @@ func (x *HealthCheckResponse) String() string {
 func (*HealthCheckResponse) ProtoMessage() {}
 
 func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[7]
+	mi := &file_api_proto_cache_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -401,7 +479,7 @@ func (x *HealthCheckResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use HealthCheckResponse.ProtoReflect.Descriptor instead.
 func (*HealthCheckResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{7}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *HealthCheckResponse) GetStatus() string {
@@ -425,82 +503,9 @@ func (x *HealthCheckResponse) GetTimestamp() *timestamppb.Timestamp {
 	return nil
 }
 
-type GetNodesRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetNodesRequest) Reset() {
-	*x = GetNodesRequest{}
-	mi := &file_api_proto_cache_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetNodesRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetNodesRequest) ProtoMessage() {}
-
-func (x *GetNodesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[8]
+func (x *HealthCheckResponse) GetDelta() *ClusterDelta {
 	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetNodesRequest.ProtoReflect.Descriptor instead.
-func (*GetNodesRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{8}
-}
-
-type GetNodesResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Nodes         []*NodeInfo            `protobuf:"bytes,1,rep,name=nodes,proto3" json:"nodes,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *GetNodesResponse) Reset() {
-	*x = GetNodesResponse{}
-	mi := &file_api_proto_cache_proto_msgTypes[9]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *GetNodesResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*GetNodesResponse) ProtoMessage() {}
-
-func (x *GetNodesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[9]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use GetNodesResponse.ProtoReflect.Descriptor instead.
-func (*GetNodesResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{9}
-}
-
-func (x *GetNodesResponse) GetNodes() []*NodeInfo {
-	if x != nil {
-		return x.Nodes
+		return x.Delta
 	}
 	return nil
 }
@@ -515,7 +520,7 @@ type GetRequest struct {
 
 func (x *GetRequest) Reset() {
 	*x = GetRequest{}
-	mi := &file_api_proto_cache_proto_msgTypes[10]
+	mi := &file_api_proto_cache_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -527,7 +532,7 @@ func (x *GetRequest) String() string {
 func (*GetRequest) ProtoMessage() {}
 
 func (x *GetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[10]
+	mi := &file_api_proto_cache_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -540,7 +545,7 @@ func (x *GetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetRequest.ProtoReflect.Descriptor instead.
 func (*GetRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{10}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *GetRequest) GetKey() string {
@@ -561,7 +566,7 @@ type GetResponse struct {
 
 func (x *GetResponse) Reset() {
 	*x = GetResponse{}
-	mi := &file_api_proto_cache_proto_msgTypes[11]
+	mi := &file_api_proto_cache_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -573,7 +578,7 @@ func (x *GetResponse) String() string {
 func (*GetResponse) ProtoMessage() {}
 
 func (x *GetResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[11]
+	mi := &file_api_proto_cache_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -586,7 +591,7 @@ func (x *GetResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetResponse.ProtoReflect.Descriptor instead.
 func (*GetResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{11}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *GetResponse) GetFound() bool {
@@ -620,7 +625,7 @@ type SetRequest struct {
 
 func (x *SetRequest) Reset() {
 	*x = SetRequest{}
-	mi := &file_api_proto_cache_proto_msgTypes[12]
+	mi := &file_api_proto_cache_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -632,7 +637,7 @@ func (x *SetRequest) String() string {
 func (*SetRequest) ProtoMessage() {}
 
 func (x *SetRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[12]
+	mi := &file_api_proto_cache_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -645,7 +650,7 @@ func (x *SetRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetRequest.ProtoReflect.Descriptor instead.
 func (*SetRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{12}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *SetRequest) GetKey() string {
@@ -672,7 +677,7 @@ type SetResponse struct {
 
 func (x *SetResponse) Reset() {
 	*x = SetResponse{}
-	mi := &file_api_proto_cache_proto_msgTypes[13]
+	mi := &file_api_proto_cache_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -684,7 +689,7 @@ func (x *SetResponse) String() string {
 func (*SetResponse) ProtoMessage() {}
 
 func (x *SetResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[13]
+	mi := &file_api_proto_cache_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -697,7 +702,7 @@ func (x *SetResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SetResponse.ProtoReflect.Descriptor instead.
 func (*SetResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{13}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *SetResponse) GetSuccess() bool {
@@ -723,7 +728,7 @@ type RebalanceAddRequest struct {
 
 func (x *RebalanceAddRequest) Reset() {
 	*x = RebalanceAddRequest{}
-	mi := &file_api_proto_cache_proto_msgTypes[14]
+	mi := &file_api_proto_cache_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -735,7 +740,7 @@ func (x *RebalanceAddRequest) String() string {
 func (*RebalanceAddRequest) ProtoMessage() {}
 
 func (x *RebalanceAddRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[14]
+	mi := &file_api_proto_cache_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -748,7 +753,7 @@ func (x *RebalanceAddRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RebalanceAddRequest.ProtoReflect.Descriptor instead.
 func (*RebalanceAddRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{14}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *RebalanceAddRequest) GetEntries() []*CacheEntry {
@@ -768,7 +773,7 @@ type RebalanceAddResponse struct {
 
 func (x *RebalanceAddResponse) Reset() {
 	*x = RebalanceAddResponse{}
-	mi := &file_api_proto_cache_proto_msgTypes[15]
+	mi := &file_api_proto_cache_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -780,7 +785,7 @@ func (x *RebalanceAddResponse) String() string {
 func (*RebalanceAddResponse) ProtoMessage() {}
 
 func (x *RebalanceAddResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[15]
+	mi := &file_api_proto_cache_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -793,7 +798,7 @@ func (x *RebalanceAddResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RebalanceAddResponse.ProtoReflect.Descriptor instead.
 func (*RebalanceAddResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{15}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *RebalanceAddResponse) GetSuccess() bool {
@@ -819,7 +824,7 @@ type RebalanceRemoveRequest struct {
 
 func (x *RebalanceRemoveRequest) Reset() {
 	*x = RebalanceRemoveRequest{}
-	mi := &file_api_proto_cache_proto_msgTypes[16]
+	mi := &file_api_proto_cache_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -831,7 +836,7 @@ func (x *RebalanceRemoveRequest) String() string {
 func (*RebalanceRemoveRequest) ProtoMessage() {}
 
 func (x *RebalanceRemoveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[16]
+	mi := &file_api_proto_cache_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -844,7 +849,7 @@ func (x *RebalanceRemoveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RebalanceRemoveRequest.ProtoReflect.Descriptor instead.
 func (*RebalanceRemoveRequest) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{16}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *RebalanceRemoveRequest) GetKeys() []string {
@@ -864,7 +869,7 @@ type RebalanceRemoveResponse struct {
 
 func (x *RebalanceRemoveResponse) Reset() {
 	*x = RebalanceRemoveResponse{}
-	mi := &file_api_proto_cache_proto_msgTypes[17]
+	mi := &file_api_proto_cache_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -876,7 +881,7 @@ func (x *RebalanceRemoveResponse) String() string {
 func (*RebalanceRemoveResponse) ProtoMessage() {}
 
 func (x *RebalanceRemoveResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_api_proto_cache_proto_msgTypes[17]
+	mi := &file_api_proto_cache_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -889,7 +894,7 @@ func (x *RebalanceRemoveResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RebalanceRemoveResponse.ProtoReflect.Descriptor instead.
 func (*RebalanceRemoveResponse) Descriptor() ([]byte, []int) {
-	return file_api_proto_cache_proto_rawDescGZIP(), []int{17}
+	return file_api_proto_cache_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *RebalanceRemoveResponse) GetRemovedEntries() []*CacheEntry {
@@ -915,28 +920,32 @@ const file_api_proto_cache_proto_rawDesc = "" +
 	"CacheEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
 	"\x05value\x18\x02 \x01(\fR\x05value\x12H\n" +
-	"\x12last_modified_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x10lastModifiedTime\"\x81\x01\n" +
+	"\x12last_modified_time\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\x10lastModifiedTime\"\x99\x01\n" +
 	"\bNodeInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
 	"\aaddress\x18\x02 \x01(\tR\aaddress\x12\x12\n" +
-	"\x04port\x18\x03 \x01(\x05R\x04port\x127\n" +
-	"\tlast_seen\x18\x04 \x01(\v2\x1a.google.protobuf.TimestampR\blastSeen\";\n" +
+	"\x04port\x18\x03 \x01(\x05R\x04port\x12\x16\n" +
+	"\x06status\x18\x04 \x01(\tR\x06status\x127\n" +
+	"\tlast_seen\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\blastSeen\"\x8f\x01\n" +
+	"\fclusterDelta\x12%\n" +
+	"\x05added\x18\x01 \x03(\v2\x0f.kyddb.NodeInfoR\x05added\x12-\n" +
+	"\tsuspected\x18\x02 \x03(\v2\x0f.kyddb.NodeInfoR\tsuspected\x12)\n" +
+	"\aremoved\x18\x03 \x03(\v2\x0f.kyddb.NodeInfoR\aremoved\";\n" +
 	"\vJoinRequest\x12,\n" +
-	"\tnode_info\x18\x01 \x01(\v2\x0f.kyddb.NodeInfoR\bnodeInfo\"(\n" +
-	"\fJoinResponse\x12\x18\n" +
-	"\asuccess\x18\x01 \x01(\bR\asuccess\"'\n" +
+	"\tnode_info\x18\x01 \x01(\v2\x0f.kyddb.NodeInfoR\bnodeInfo\"l\n" +
+	"\fJoinResponse\x12%\n" +
+	"\x05nodes\x18\x01 \x03(\v2\x0f.kyddb.NodeInfoR\x05nodes\x125\n" +
+	"\rbootstrapNode\x18\x02 \x01(\v2\x0f.kyddb.NodeInfoR\rbootstrapNode\"'\n" +
 	"\fLeaveRequest\x12\x17\n" +
 	"\anode_id\x18\x01 \x01(\tR\x06nodeId\")\n" +
 	"\rLeaveResponse\x12\x18\n" +
 	"\asuccess\x18\x01 \x01(\bR\asuccess\"\x14\n" +
-	"\x12HealthCheckRequest\"\x80\x01\n" +
+	"\x12HealthCheckRequest\"\xab\x01\n" +
 	"\x13HealthCheckResponse\x12\x16\n" +
 	"\x06status\x18\x01 \x01(\tR\x06status\x12\x17\n" +
 	"\anode_id\x18\x02 \x01(\tR\x06nodeId\x128\n" +
-	"\ttimestamp\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\"\x11\n" +
-	"\x0fGetNodesRequest\"9\n" +
-	"\x10GetNodesResponse\x12%\n" +
-	"\x05nodes\x18\x01 \x03(\v2\x0f.kyddb.NodeInfoR\x05nodes\"\x1e\n" +
+	"\ttimestamp\x18\x03 \x01(\v2\x1a.google.protobuf.TimestampR\ttimestamp\x12)\n" +
+	"\x05delta\x18\x04 \x01(\v2\x13.kyddb.clusterDeltaR\x05delta\"\x1e\n" +
 	"\n" +
 	"GetRequest\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\"O\n" +
@@ -960,12 +969,11 @@ const file_api_proto_cache_proto_rawDesc = "" +
 	"\x04keys\x18\x01 \x03(\tR\x04keys\"k\n" +
 	"\x17RebalanceRemoveResponse\x12:\n" +
 	"\x0fremoved_entries\x18\x01 \x03(\v2\x11.kyddb.CacheEntryR\x0eremovedEntries\x12\x14\n" +
-	"\x05error\x18\x02 \x01(\tR\x05error2\xec\x03\n" +
+	"\x05error\x18\x02 \x01(\tR\x05error2\xaf\x03\n" +
 	"\vNodeService\x12/\n" +
 	"\x04Join\x12\x12.kyddb.JoinRequest\x1a\x13.kyddb.JoinResponse\x122\n" +
 	"\x05Leave\x12\x13.kyddb.LeaveRequest\x1a\x14.kyddb.LeaveResponse\x12D\n" +
-	"\vHealthCheck\x12\x19.kyddb.HealthCheckRequest\x1a\x1a.kyddb.HealthCheckResponse\x12;\n" +
-	"\bGetNodes\x12\x16.kyddb.GetNodesRequest\x1a\x17.kyddb.GetNodesResponse\x12,\n" +
+	"\vHealthCheck\x12\x19.kyddb.HealthCheckRequest\x1a\x1a.kyddb.HealthCheckResponse\x12,\n" +
 	"\x03Get\x12\x11.kyddb.GetRequest\x1a\x12.kyddb.GetResponse\x12,\n" +
 	"\x03Set\x12\x11.kyddb.SetRequest\x1a\x12.kyddb.SetResponse\x12G\n" +
 	"\fRebalanceAdd\x12\x1a.kyddb.RebalanceAddRequest\x1a\x1b.kyddb.RebalanceAddResponse\x12P\n" +
@@ -983,57 +991,59 @@ func file_api_proto_cache_proto_rawDescGZIP() []byte {
 	return file_api_proto_cache_proto_rawDescData
 }
 
-var file_api_proto_cache_proto_msgTypes = make([]protoimpl.MessageInfo, 18)
+var file_api_proto_cache_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
 var file_api_proto_cache_proto_goTypes = []any{
 	(*CacheEntry)(nil),              // 0: kyddb.CacheEntry
 	(*NodeInfo)(nil),                // 1: kyddb.NodeInfo
-	(*JoinRequest)(nil),             // 2: kyddb.JoinRequest
-	(*JoinResponse)(nil),            // 3: kyddb.JoinResponse
-	(*LeaveRequest)(nil),            // 4: kyddb.LeaveRequest
-	(*LeaveResponse)(nil),           // 5: kyddb.LeaveResponse
-	(*HealthCheckRequest)(nil),      // 6: kyddb.HealthCheckRequest
-	(*HealthCheckResponse)(nil),     // 7: kyddb.HealthCheckResponse
-	(*GetNodesRequest)(nil),         // 8: kyddb.GetNodesRequest
-	(*GetNodesResponse)(nil),        // 9: kyddb.GetNodesResponse
-	(*GetRequest)(nil),              // 10: kyddb.GetRequest
-	(*GetResponse)(nil),             // 11: kyddb.GetResponse
-	(*SetRequest)(nil),              // 12: kyddb.SetRequest
-	(*SetResponse)(nil),             // 13: kyddb.SetResponse
-	(*RebalanceAddRequest)(nil),     // 14: kyddb.RebalanceAddRequest
-	(*RebalanceAddResponse)(nil),    // 15: kyddb.RebalanceAddResponse
-	(*RebalanceRemoveRequest)(nil),  // 16: kyddb.RebalanceRemoveRequest
-	(*RebalanceRemoveResponse)(nil), // 17: kyddb.RebalanceRemoveResponse
-	(*timestamppb.Timestamp)(nil),   // 18: google.protobuf.Timestamp
+	(*ClusterDelta)(nil),            // 2: kyddb.clusterDelta
+	(*JoinRequest)(nil),             // 3: kyddb.JoinRequest
+	(*JoinResponse)(nil),            // 4: kyddb.JoinResponse
+	(*LeaveRequest)(nil),            // 5: kyddb.LeaveRequest
+	(*LeaveResponse)(nil),           // 6: kyddb.LeaveResponse
+	(*HealthCheckRequest)(nil),      // 7: kyddb.HealthCheckRequest
+	(*HealthCheckResponse)(nil),     // 8: kyddb.HealthCheckResponse
+	(*GetRequest)(nil),              // 9: kyddb.GetRequest
+	(*GetResponse)(nil),             // 10: kyddb.GetResponse
+	(*SetRequest)(nil),              // 11: kyddb.SetRequest
+	(*SetResponse)(nil),             // 12: kyddb.SetResponse
+	(*RebalanceAddRequest)(nil),     // 13: kyddb.RebalanceAddRequest
+	(*RebalanceAddResponse)(nil),    // 14: kyddb.RebalanceAddResponse
+	(*RebalanceRemoveRequest)(nil),  // 15: kyddb.RebalanceRemoveRequest
+	(*RebalanceRemoveResponse)(nil), // 16: kyddb.RebalanceRemoveResponse
+	(*timestamppb.Timestamp)(nil),   // 17: google.protobuf.Timestamp
 }
 var file_api_proto_cache_proto_depIdxs = []int32{
-	18, // 0: kyddb.CacheEntry.last_modified_time:type_name -> google.protobuf.Timestamp
-	18, // 1: kyddb.NodeInfo.last_seen:type_name -> google.protobuf.Timestamp
-	1,  // 2: kyddb.JoinRequest.node_info:type_name -> kyddb.NodeInfo
-	18, // 3: kyddb.HealthCheckResponse.timestamp:type_name -> google.protobuf.Timestamp
-	1,  // 4: kyddb.GetNodesResponse.nodes:type_name -> kyddb.NodeInfo
-	0,  // 5: kyddb.RebalanceAddRequest.entries:type_name -> kyddb.CacheEntry
-	0,  // 6: kyddb.RebalanceRemoveResponse.removed_entries:type_name -> kyddb.CacheEntry
-	2,  // 7: kyddb.NodeService.Join:input_type -> kyddb.JoinRequest
-	4,  // 8: kyddb.NodeService.Leave:input_type -> kyddb.LeaveRequest
-	6,  // 9: kyddb.NodeService.HealthCheck:input_type -> kyddb.HealthCheckRequest
-	8,  // 10: kyddb.NodeService.GetNodes:input_type -> kyddb.GetNodesRequest
-	10, // 11: kyddb.NodeService.Get:input_type -> kyddb.GetRequest
-	12, // 12: kyddb.NodeService.Set:input_type -> kyddb.SetRequest
-	14, // 13: kyddb.NodeService.RebalanceAdd:input_type -> kyddb.RebalanceAddRequest
-	16, // 14: kyddb.NodeService.RebalanceRemove:input_type -> kyddb.RebalanceRemoveRequest
-	3,  // 15: kyddb.NodeService.Join:output_type -> kyddb.JoinResponse
-	5,  // 16: kyddb.NodeService.Leave:output_type -> kyddb.LeaveResponse
-	7,  // 17: kyddb.NodeService.HealthCheck:output_type -> kyddb.HealthCheckResponse
-	9,  // 18: kyddb.NodeService.GetNodes:output_type -> kyddb.GetNodesResponse
-	11, // 19: kyddb.NodeService.Get:output_type -> kyddb.GetResponse
-	13, // 20: kyddb.NodeService.Set:output_type -> kyddb.SetResponse
-	15, // 21: kyddb.NodeService.RebalanceAdd:output_type -> kyddb.RebalanceAddResponse
-	17, // 22: kyddb.NodeService.RebalanceRemove:output_type -> kyddb.RebalanceRemoveResponse
-	15, // [15:23] is the sub-list for method output_type
-	7,  // [7:15] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	17, // 0: kyddb.CacheEntry.last_modified_time:type_name -> google.protobuf.Timestamp
+	17, // 1: kyddb.NodeInfo.last_seen:type_name -> google.protobuf.Timestamp
+	1,  // 2: kyddb.clusterDelta.added:type_name -> kyddb.NodeInfo
+	1,  // 3: kyddb.clusterDelta.suspected:type_name -> kyddb.NodeInfo
+	1,  // 4: kyddb.clusterDelta.removed:type_name -> kyddb.NodeInfo
+	1,  // 5: kyddb.JoinRequest.node_info:type_name -> kyddb.NodeInfo
+	1,  // 6: kyddb.JoinResponse.nodes:type_name -> kyddb.NodeInfo
+	1,  // 7: kyddb.JoinResponse.bootstrapNode:type_name -> kyddb.NodeInfo
+	17, // 8: kyddb.HealthCheckResponse.timestamp:type_name -> google.protobuf.Timestamp
+	2,  // 9: kyddb.HealthCheckResponse.delta:type_name -> kyddb.clusterDelta
+	0,  // 10: kyddb.RebalanceAddRequest.entries:type_name -> kyddb.CacheEntry
+	0,  // 11: kyddb.RebalanceRemoveResponse.removed_entries:type_name -> kyddb.CacheEntry
+	3,  // 12: kyddb.NodeService.Join:input_type -> kyddb.JoinRequest
+	5,  // 13: kyddb.NodeService.Leave:input_type -> kyddb.LeaveRequest
+	7,  // 14: kyddb.NodeService.HealthCheck:input_type -> kyddb.HealthCheckRequest
+	9,  // 15: kyddb.NodeService.Get:input_type -> kyddb.GetRequest
+	11, // 16: kyddb.NodeService.Set:input_type -> kyddb.SetRequest
+	13, // 17: kyddb.NodeService.RebalanceAdd:input_type -> kyddb.RebalanceAddRequest
+	15, // 18: kyddb.NodeService.RebalanceRemove:input_type -> kyddb.RebalanceRemoveRequest
+	4,  // 19: kyddb.NodeService.Join:output_type -> kyddb.JoinResponse
+	6,  // 20: kyddb.NodeService.Leave:output_type -> kyddb.LeaveResponse
+	8,  // 21: kyddb.NodeService.HealthCheck:output_type -> kyddb.HealthCheckResponse
+	10, // 22: kyddb.NodeService.Get:output_type -> kyddb.GetResponse
+	12, // 23: kyddb.NodeService.Set:output_type -> kyddb.SetResponse
+	14, // 24: kyddb.NodeService.RebalanceAdd:output_type -> kyddb.RebalanceAddResponse
+	16, // 25: kyddb.NodeService.RebalanceRemove:output_type -> kyddb.RebalanceRemoveResponse
+	19, // [19:26] is the sub-list for method output_type
+	12, // [12:19] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_api_proto_cache_proto_init() }
@@ -1047,7 +1057,7 @@ func file_api_proto_cache_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_api_proto_cache_proto_rawDesc), len(file_api_proto_cache_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   18,
+			NumMessages:   17,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

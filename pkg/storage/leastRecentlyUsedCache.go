@@ -36,7 +36,7 @@ func (lru *LeastRecentlyUsedCache) evict() error {
 	if !ok {
 		return errors.New("eviction error")
 	}
-	delete(lru.storageIndex, entry.key)
+	delete(lru.storageIndex, entry.Key)
 	lru.storageList.Remove(element)
 	return nil
 }
@@ -49,8 +49,8 @@ func (lru *LeastRecentlyUsedCache) Set(key string, value []byte) error {
 		if !ok {
 			return errors.New("key set error")
 		}
-		entry.value = value
-		entry.lastModifiedTime = time.Now()
+		entry.Value = value
+		entry.LastModifiedTime = time.Now()
 		element.Value = entry
 		lru.storageList.MoveToFront(element)
 		return nil
@@ -62,9 +62,9 @@ func (lru *LeastRecentlyUsedCache) Set(key string, value []byte) error {
 		}
 	}
 	element := lru.storageList.PushFront(CacheEntry{
-		key:              key,
-		value:            value,
-		lastModifiedTime: time.Now(),
+		Key:              key,
+		Value:            value,
+		LastModifiedTime: time.Now(),
 	})
 	lru.storageIndex[key] = element
 	return nil
@@ -80,10 +80,10 @@ func (lru *LeastRecentlyUsedCache) Get(key string) ([]byte, error) {
 		return nil, errors.New("cache get error")
 	} else {
 		lru.storageList.MoveToFront(element)
-		return entry.value, nil
+		return entry.Value, nil
 	}
 }
-func (lru *LeastRecentlyUsedCache) lruLen() int {
+func (lru *LeastRecentlyUsedCache) Len() int {
 	return len(lru.storageIndex)
 }
 func (lru *LeastRecentlyUsedCache) AddToRebalance(pairsToAdd []CacheEntry) (err error) {
@@ -92,11 +92,11 @@ func (lru *LeastRecentlyUsedCache) AddToRebalance(pairsToAdd []CacheEntry) (err 
 	index := 0
 	for element := lru.storageList.Front(); element != nil && index < len(pairsToAdd); element = element.Next() {
 		if entry, ok := element.Value.(CacheEntry); ok {
-			if entry.lastModifiedTime.Before(pairsToAdd[index].lastModifiedTime) {
+			if entry.LastModifiedTime.Before(pairsToAdd[index].LastModifiedTime) {
 				newElement := lru.storageList.InsertBefore(pairsToAdd[index], element)
-				lru.storageIndex[pairsToAdd[index].key] = newElement
+				lru.storageIndex[pairsToAdd[index].Key] = newElement
 				index++
-				if lru.lruLen() > lru.maxSize {
+				if lru.Len() > lru.maxSize {
 					err := lru.evict()
 					if err != nil {
 						return errors.New("key set error")
@@ -105,9 +105,9 @@ func (lru *LeastRecentlyUsedCache) AddToRebalance(pairsToAdd []CacheEntry) (err 
 			}
 		}
 	}
-	for index < len(pairsToAdd) && lru.lruLen() < lru.maxSize {
+	for index < len(pairsToAdd) && lru.Len() < lru.maxSize {
 		newElement := lru.storageList.PushBack(pairsToAdd[index])
-		lru.storageIndex[pairsToAdd[index].key] = newElement
+		lru.storageIndex[pairsToAdd[index].Key] = newElement
 		index++
 	}
 	return nil
@@ -120,13 +120,13 @@ func (lru *LeastRecentlyUsedCache) RemoveKeyToRebalance(keysToRemove []string) [
 			if entry, ok := element.Value.(CacheEntry); ok {
 				output = append(output, entry)
 				lru.storageList.Remove(element)
-				delete(lru.storageIndex, entry.key)
+				delete(lru.storageIndex, entry.Key)
 			}
 		}
 	}
 	lru.mu.Unlock()
 	sort.Slice(output, func(i, j int) bool {
-		return output[i].lastModifiedTime.After(output[j].lastModifiedTime)
+		return output[i].LastModifiedTime.After(output[j].LastModifiedTime)
 	})
 	return output
 }

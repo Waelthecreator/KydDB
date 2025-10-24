@@ -22,7 +22,6 @@ const (
 	NodeService_Join_FullMethodName            = "/kyddb.NodeService/Join"
 	NodeService_Leave_FullMethodName           = "/kyddb.NodeService/Leave"
 	NodeService_HealthCheck_FullMethodName     = "/kyddb.NodeService/HealthCheck"
-	NodeService_GetNodes_FullMethodName        = "/kyddb.NodeService/GetNodes"
 	NodeService_Get_FullMethodName             = "/kyddb.NodeService/Get"
 	NodeService_Set_FullMethodName             = "/kyddb.NodeService/Set"
 	NodeService_RebalanceAdd_FullMethodName    = "/kyddb.NodeService/RebalanceAdd"
@@ -33,11 +32,9 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type NodeServiceClient interface {
-	// Cluster management
 	Join(ctx context.Context, in *JoinRequest, opts ...grpc.CallOption) (*JoinResponse, error)
 	Leave(ctx context.Context, in *LeaveRequest, opts ...grpc.CallOption) (*LeaveResponse, error)
 	HealthCheck(ctx context.Context, in *HealthCheckRequest, opts ...grpc.CallOption) (*HealthCheckResponse, error)
-	GetNodes(ctx context.Context, in *GetNodesRequest, opts ...grpc.CallOption) (*GetNodesResponse, error)
 	Get(ctx context.Context, in *GetRequest, opts ...grpc.CallOption) (*GetResponse, error)
 	Set(ctx context.Context, in *SetRequest, opts ...grpc.CallOption) (*SetResponse, error)
 	RebalanceAdd(ctx context.Context, in *RebalanceAddRequest, opts ...grpc.CallOption) (*RebalanceAddResponse, error)
@@ -76,16 +73,6 @@ func (c *nodeServiceClient) HealthCheck(ctx context.Context, in *HealthCheckRequ
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(HealthCheckResponse)
 	err := c.cc.Invoke(ctx, NodeService_HealthCheck_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *nodeServiceClient) GetNodes(ctx context.Context, in *GetNodesRequest, opts ...grpc.CallOption) (*GetNodesResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(GetNodesResponse)
-	err := c.cc.Invoke(ctx, NodeService_GetNodes_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -136,11 +123,9 @@ func (c *nodeServiceClient) RebalanceRemove(ctx context.Context, in *RebalanceRe
 // All implementations must embed UnimplementedNodeServiceServer
 // for forward compatibility.
 type NodeServiceServer interface {
-	// Cluster management
 	Join(context.Context, *JoinRequest) (*JoinResponse, error)
 	Leave(context.Context, *LeaveRequest) (*LeaveResponse, error)
 	HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error)
-	GetNodes(context.Context, *GetNodesRequest) (*GetNodesResponse, error)
 	Get(context.Context, *GetRequest) (*GetResponse, error)
 	Set(context.Context, *SetRequest) (*SetResponse, error)
 	RebalanceAdd(context.Context, *RebalanceAddRequest) (*RebalanceAddResponse, error)
@@ -163,9 +148,6 @@ func (UnimplementedNodeServiceServer) Leave(context.Context, *LeaveRequest) (*Le
 }
 func (UnimplementedNodeServiceServer) HealthCheck(context.Context, *HealthCheckRequest) (*HealthCheckResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method HealthCheck not implemented")
-}
-func (UnimplementedNodeServiceServer) GetNodes(context.Context, *GetNodesRequest) (*GetNodesResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetNodes not implemented")
 }
 func (UnimplementedNodeServiceServer) Get(context.Context, *GetRequest) (*GetResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Get not implemented")
@@ -250,24 +232,6 @@ func _NodeService_HealthCheck_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(NodeServiceServer).HealthCheck(ctx, req.(*HealthCheckRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _NodeService_GetNodes_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetNodesRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(NodeServiceServer).GetNodes(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: NodeService_GetNodes_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(NodeServiceServer).GetNodes(ctx, req.(*GetNodesRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -362,10 +326,6 @@ var NodeService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "HealthCheck",
 			Handler:    _NodeService_HealthCheck_Handler,
-		},
-		{
-			MethodName: "GetNodes",
-			Handler:    _NodeService_GetNodes_Handler,
 		},
 		{
 			MethodName: "Get",
